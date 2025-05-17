@@ -30,9 +30,9 @@ dist-lambda:
 	--only-binary=:all: \
 	-r requirements-lambda.txt
 	rm -rf lambda/bin
+	rm -rf lambda/pandas/tests
 	rm -rf lambda/pyarrow
 	find lambda -name "__pycache__" -prune -exec rm -rf {} \;
-	find lambda -name "*.dist-info" -prune -exec rm -rf {} \;
 	cp download.py lambda
 	cd lambda && zip -r ../lambda.zip .
 
@@ -74,6 +74,7 @@ run-lambda:
 	aws lambda invoke \
 	--region eu-north-1 \
 	--function-name pollen-download \
+	--cli-read-timeout 900 \
 	response.json
 	cat response.json
 

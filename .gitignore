@@ -1,0 +1,11 @@
+.env
+.envrc
+__pycache__
+helsinki.json
+helsinki.npz
+html
+lambda
+lambda.zip
+requirements-lambda.txt
+response.json
+venv

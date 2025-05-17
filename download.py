@@ -24,9 +24,6 @@ VARIABLES = {
     "ragweed_pollen": "rwpg_conc",
 }
 
-def explode(f):
-    return {x: f(x) for x in VARIABLES.values()}
-
 def download():
     # https://ads.atmosphere.copernicus.eu/how-to-api
     # https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts
@@ -60,6 +57,7 @@ def download():
     data.date = data.datetime.astype("datetime64[D]")
     # 1. Aggregate over hours to find the daily peaks for each grid cell.
     # 2. Aggregate over grid cells to find the city medians for each day.
+    explode = lambda f: {x: f(x) for x in VARIABLES.values()}
     data = data.group_by("date", "longitude", "latitude").aggregate(**explode(di.max))
     data = data.group_by("date").aggregate(**explode(di.median))
     data = data.rename(**{k.split("_")[0]: v for k, v in VARIABLES.items()})

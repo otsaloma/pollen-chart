@@ -2,9 +2,7 @@
 
 :root {
   --color-background: white;
-  --color-bar:  #93c5fd;
   --color-link: #3b82f6;
-  --color-ref:  rgba(239, 68, 68, 0.7);
   --color-text: #374151;
   --font-family-sans-serif: "Avenir Next",
                             -apple-system,
@@ -22,15 +20,16 @@
 
   --font-size-h1: 4rem;
   --font-size-main: 16px;
+  --font-size-small: 14px;
   --height-bar: 36px;
   --padding-1: 1rem;
   --padding-2: 2rem;
+  --padding-3: 3rem;
 }
 
 @media (max-width: 600px) {
   :root {
     --font-size-h1: 2.75rem;
-    --padding-2: 1rem;
   }
 }
 
@@ -70,15 +69,43 @@ p {
   text-align: left;
 }
 
-.hidden {
-  display: none;
+.align-left {
+  text-align: left;
+}
+
+.align-right {
+  text-align: right;
+}
+
+#intro {
+  text-align: center;
+}
+
+#chart {
+  display: grid;
+  gap: 12px;
+  grid-auto-rows: 48px;
+  grid-template-columns: auto 1fr auto auto;
+}
+
+#chart > * {
+  align-self: end;
+}
+
+#chart .bars {
+  align-items: end;
+  align-self: auto;
+  display: grid;
+  gap: 2px;
+}
+
+#chart .bar {
+  background-color: #00bc7d;
+  min-height: 1px;
 }
 
 footer {
-  margin-top: var(--padding-2);
+  font-size: var(--font-size-small);
+  margin-top: var(--padding-3);
   opacity: 0.7;
-}
-
-footer p {
-  text-align: center;
 }

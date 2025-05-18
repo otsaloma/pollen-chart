@@ -46,7 +46,7 @@ body {
   line-height: 1.5em;
   margin: 0 auto;
   max-width: 400px;
-  padding: var(--padding-1) var(--padding-1) calc(var(--padding-1) * 2) var(--padding-1);
+  padding: var(--padding-1) var(--padding-2) calc(var(--padding-2) * 2) var(--padding-2);
   text-align: center;
   text-rendering: optimizeLegibility;
 }

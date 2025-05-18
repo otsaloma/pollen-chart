@@ -33,7 +33,9 @@ def download():
     zip_handle, zip_path = tempfile.mkstemp(suffix=".zip")
     client.retrieve("cams-europe-air-quality-forecasts", {
         "variable": list(VARIABLES.keys()),
-        "model": ["ensemble"],
+        # Is FMI's SILAM the best in Finland?
+        # https://silam.fmi.fi/pollen.html
+        "model": ["silam"],
         "level": ["0"],
         "date": [f"{first.isoformat()}/{today.isoformat()}"],
         "type": ["forecast"],
@@ -47,7 +49,7 @@ def download():
     print(f"Downloaded {zip_path}")
     nc_path = Path(zip_path).with_suffix(".nc")
     with zipfile.ZipFile(zip_path, "r") as zf:
-        with zf.open("ENS_FORECAST.nc") as f:
+        with zf.open("SILAM_FORECAST.nc") as f:
             nc_path.write_bytes(f.read())
             print(f"Extracted {nc_path}")
     with xr.open_dataset(nc_path, decode_timedelta=False) as dataset:

@@ -10,6 +10,12 @@ const YMAX_DEFAULT_LEVELS = {
     ragweed:  30,
 };
 
+function formatDate(string) {
+    const date = new Date(string);
+    const weekday = ["su", "ma", "ti", "ke", "to", "pe", "la"][date.getDay()];
+    return `${weekday} ${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`;
+}
+
 function renderRow(data, key, label) {
     const chart = document.getElementById("chart");
     const last = data[data.length-1];
@@ -17,7 +23,10 @@ function renderRow(data, key, label) {
     // Label
     var div = document.createElement("div");
     div.classList.add("align-left");
-    div.innerHTML = label;
+    div.classList.add("hint--right");
+    div.classList.add("hint--rounded");
+    div.setAttribute("aria-label", label);
+    div.innerHTML = label.substring(0, 3);
     chart.appendChild(div);
 
     // Bar
@@ -31,6 +40,9 @@ function renderRow(data, key, label) {
     for (var item of data) {
         var bar = document.createElement("div");
         bar.classList.add("bar");
+        bar.classList.add("hint--bottom");
+        bar.classList.add("hint--rounded");
+        bar.setAttribute("aria-label", `${formatDate(item.date)} · ${item[key].toFixed(0)} h/m³`);
         var height = item[key] / ref;
         bar.style.height = `${100*item[key]/ref}%`;
         div.appendChild(bar);
@@ -39,11 +51,13 @@ function renderRow(data, key, label) {
 
     // Percent change
     // Compare the latest date against mean of the previous seven.
+    // Avoid showing huge percentages for tiny numbers.
     var div = document.createElement("div");
     div.classList.add("align-right");
     var prev = data.slice(-8, -1);
     var ref = prev.reduce((total, x) => total + x[key], 0) / prev.length;
-    var value = (Math.max(1, last[key]) - Math.max(1, ref)) / Math.max(1, ref);
+    var threshold = YMAX_DEFAULT_LEVELS[key] / 10;
+    var value = (Math.max(threshold, last[key]) - Math.max(threshold, ref)) / Math.max(threshold, ref);
     sign = value === 0 ? "" : (value < 0 ? "–" : "+");
     div.innerHTML = `${sign}${Math.abs(100*value).toFixed(0)}%`;
     chart.appendChild(div);
@@ -55,12 +69,6 @@ function renderRow(data, key, label) {
     div.innerHTML = `${value.toFixed(0)}`;
     chart.appendChild(div);
 
-}
-
-function formatDate(string) {
-    const date = new Date(string);
-    const weekday = ["su", "ma", "ti", "ke", "to", "pe", "la"][date.getDay()];
-    return `${weekday} ${date.getDate()}.${date.getMonth()+1}.${date.getFullYear()}`;
 }
 
 function renderChart(data) {

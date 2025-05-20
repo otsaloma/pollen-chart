@@ -89,8 +89,8 @@ function renderChart(data) {
                     .concat(data.filter(x => x.partition === "future").slice(0, 3))));
 
     const p = document.getElementById("intro");
-    const date = data[data.length-1].date;
-    intro.innerHTML = `Tilanne ${formatDate(date)}`;
+    const today = data.filter(x => x.partition === "today")[0];
+    intro.innerHTML = `Tilanne ${formatDate(today.date)}`;
     // In chronological order of appearance
     // https://www.siitepolytieto.fi/mika-allergia/siitepolykausi
     renderRow(data, "alder", "Leppä");

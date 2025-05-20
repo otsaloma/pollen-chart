@@ -18,7 +18,7 @@ function formatDate(string) {
 
 function renderRow(data, key, label) {
     const chart = document.getElementById("chart");
-    const last = data[data.length-1];
+    const today = data.filter(x => x.partition === "today")[0];
 
     // Label
     var div = document.createElement("div");
@@ -64,7 +64,7 @@ function renderRow(data, key, label) {
     var prev = data.filter(x => x.partition === "past").slice(-7);
     var ref = prev.reduce((total, x) => total + x[key], 0) / prev.length;
     if (ref >= YMAX_DEFAULT_LEVELS[key] / 10) {
-        var value = (last[key] - ref) / ref;
+        var value = (today[key] - ref) / ref;
         value = Math.max(-9.99, Math.min(9.99, value));
         sign = value === 0 ? "" : (value < 0 ? "–" : "+");
         div.innerHTML = `${sign}${Math.abs(100*value).toFixed(0)}%`;
@@ -76,7 +76,7 @@ function renderRow(data, key, label) {
     // Value (grains/m3)
     var div = document.createElement("div");
     div.classList.add("align-right");
-    var value = Number(last[key].toPrecision(2));
+    var value = Number(today[key].toPrecision(2));
     div.innerHTML = `${value.toFixed(0)}`;
     chart.appendChild(div);
 

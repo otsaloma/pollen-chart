@@ -41,7 +41,7 @@ function renderRow(data, key, label) {
         bar.classList.add(item.partition);
         // Need to use px so that span positioning below works.
         // Note the height defined also in style.css for #chart.
-        var height = 48 * item[key] / ref;
+        var height = Math.max(1, 48 * item[key] / ref);
         bar.style.height = `${height}px`;
         if (item.partition === "today") {
             var span = document.createElement("span");

@@ -58,15 +58,19 @@ function renderRow(data, key, label) {
 
     // Percent change
     // Compare the latest date against mean of the previous seven.
-    // Avoid showing huge percentages for tiny numbers.
+    // Avoid showing huge percentages given tiny denominators.
     var div = document.createElement("div");
     div.classList.add("align-right");
-    var prev = data.slice(-8, -1);
+    var prev = data.filter(x => x.partition === "past").slice(-7);
     var ref = prev.reduce((total, x) => total + x[key], 0) / prev.length;
-    var threshold = YMAX_DEFAULT_LEVELS[key] / 10;
-    var value = (Math.max(threshold, last[key]) - Math.max(threshold, ref)) / Math.max(threshold, ref);
-    sign = value === 0 ? "" : (value < 0 ? "–" : "+");
-    div.innerHTML = `${sign}${Math.abs(100*value).toFixed(0)}%`;
+    if (ref >= YMAX_DEFAULT_LEVELS[key] / 10) {
+        var value = (last[key] - ref) / ref;
+        value = Math.max(-9.99, Math.min(9.99, value));
+        sign = value === 0 ? "" : (value < 0 ? "–" : "+");
+        div.innerHTML = `${sign}${Math.abs(100*value).toFixed(0)}%`;
+    } else {
+        div.innerHTML = `⋯`;
+    }
     chart.appendChild(div);
 
     // Value (grains/m3)
@@ -80,9 +84,9 @@ function renderRow(data, key, label) {
 
 function renderChart(data) {
     // Make sure we have at most the expected amount of data.
-    data = (data.filter(x => x.partition == "past").slice(-7)
-            .concat(data.filter(x => x.partition == "today")
-                    .concat(data.filter(x => x.partition == "future").slice(0, 3))));
+    data = (data.filter(x => x.partition === "past").slice(-7)
+            .concat(data.filter(x => x.partition === "today")
+                    .concat(data.filter(x => x.partition === "future").slice(0, 3))));
 
     const p = document.getElementById("intro");
     const date = data[data.length-1].date;

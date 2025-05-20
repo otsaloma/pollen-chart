@@ -24,12 +24,10 @@ VARIABLES = {
     "ragweed_pollen": "rwpg_conc",
 }
 
-def download():
+def retrieve(fm, to, hours):
     # https://ads.atmosphere.copernicus.eu/how-to-api
     # https://ads.atmosphere.copernicus.eu/datasets/cams-europe-air-quality-forecasts
     client = cdsapi.Client()
-    today = datetime.date.today()
-    first = today - datetime.timedelta(days=13)
     zip_handle, zip_path = tempfile.mkstemp(suffix=".zip")
     client.retrieve("cams-europe-air-quality-forecasts", {
         "variable": list(VARIABLES.keys()),
@@ -37,10 +35,10 @@ def download():
         # https://silam.fmi.fi/pollen.html
         "model": ["silam"],
         "level": ["0"],
-        "date": [f"{first.isoformat()}/{today.isoformat()}"],
+        "date": [f"{fm.isoformat()}/{to.isoformat()}"],
         "type": ["forecast"],
         "time": ["00:00"],
-        "leadtime_hour": [str(x) for x in range(24)],
+        "leadtime_hour": [str(x) for x in range(hours)],
         "data_format": "netcdf_zip",
         # Helsinki YMAX, XMIN, YMIN, XMAX
         # https://boundingbox.klokantech.com/
@@ -55,13 +53,27 @@ def download():
     with xr.open_dataset(nc_path, decode_timedelta=False) as dataset:
         data = dataset.to_dataframe().reset_index()
         data = di.DataFrame.from_pandas(data)
-    data.datetime = np.datetime64(first, "s") + data.time.astype("timedelta64[h]")
+        assert data and data.nrow
+    data.datetime = np.datetime64(fm, "s") + data.time.astype("timedelta64[h]")
     data.date = data.datetime.astype("datetime64[D]")
+    return data
+
+def download():
+    today = datetime.date.today()
+    first = today - datetime.timedelta(days=13)
+    yesterday = today - datetime.timedelta(days=1)
+    data1 = retrieve(first, yesterday, 24)
+    data2 = retrieve(today, today, 96)
+    data = data1.rbind(data2)
+    data.partition = np.where(data.date < today, "past",
+                              np.where(data.date == today, "today",
+                                       "future"))
+
     # 1. Aggregate over hours to find the daily peaks for each grid cell.
     # 2. Aggregate over grid cells to find the city medians for each day.
     explode = lambda f: {x: f(x) for x in VARIABLES.values()}
-    data = data.group_by("date", "longitude", "latitude").aggregate(**explode(di.max))
-    data = data.group_by("date").aggregate(**explode(di.median))
+    data = data.group_by("date", "partition", "longitude", "latitude").aggregate(**explode(di.max))
+    data = data.group_by("date", "partition").aggregate(**explode(di.median))
     data = data.rename(**{k.split("_")[0]: v for k, v in VARIABLES.items()})
     data.date = data.date.as_string()
     return data

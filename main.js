@@ -38,8 +38,18 @@ function renderRow(data, key, label) {
     for (var item of data) {
         var bar = document.createElement("div");
         bar.classList.add("bar");
-        var height = item[key] / ref;
-        bar.style.height = `${100*item[key]/ref}%`;
+        bar.classList.add(item.partition);
+        // Need to use px so that span positioning below works.
+        // Note the height defined also in style.css for #chart.
+        var height = 48 * item[key] / ref;
+        bar.style.height = `${height}px`;
+        if (item.partition === "today") {
+            var span = document.createElement("span");
+            span.style.position = "relative";
+            span.style.top = `${height-3}px`;
+            span.innerHTML = "↑";
+            bar.appendChild(span);
+        }
         var text = `${formatDate(item.date)} · ${item[key].toFixed(0)} h/m³`;
         tippy(bar, {content: text, placement: "bottom"});
         div.appendChild(bar);
@@ -69,7 +79,11 @@ function renderRow(data, key, label) {
 }
 
 function renderChart(data) {
-    data = data.slice(-8);
+    // Make sure we have at most the expected amount of data.
+    data = (data.filter(x => x.partition == "past").slice(-7)
+            .concat(data.filter(x => x.partition == "today")
+                    .concat(data.filter(x => x.partition == "future").slice(0, 3))));
+
     const p = document.getElementById("intro");
     const date = data[data.length-1].date;
     intro.innerHTML = `Tilanne ${formatDate(date)}`;

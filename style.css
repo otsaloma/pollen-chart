@@ -77,10 +77,6 @@ p {
   text-align: right;
 }
 
-.hint--bottom::after, .hint--left::after, .hint--right::after, .hint--top::after {
-  font-size: var(--font-size-small);
-}
-
 #intro {
   text-align: right;
 }

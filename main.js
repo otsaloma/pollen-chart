@@ -23,10 +23,8 @@ function renderRow(data, key, label) {
     // Label
     var div = document.createElement("div");
     div.classList.add("align-left");
-    div.classList.add("hint--right");
-    div.classList.add("hint--rounded");
-    div.setAttribute("aria-label", label);
     div.innerHTML = label.substring(0, 3);
+    tippy(div, {content: label, placement: "right"});
     chart.appendChild(div);
 
     // Bar
@@ -40,11 +38,10 @@ function renderRow(data, key, label) {
     for (var item of data) {
         var bar = document.createElement("div");
         bar.classList.add("bar");
-        bar.classList.add("hint--bottom");
-        bar.classList.add("hint--rounded");
-        bar.setAttribute("aria-label", `${formatDate(item.date)} · ${item[key].toFixed(0)} h/m³`);
         var height = item[key] / ref;
         bar.style.height = `${100*item[key]/ref}%`;
+        var text = `${formatDate(item.date)} · ${item[key].toFixed(0)} h/m³`;
+        tippy(bar, {content: text, placement: "bottom"});
         div.appendChild(bar);
     }
     chart.appendChild(div);

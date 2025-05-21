@@ -107,6 +107,10 @@ p {
   background-color: #fe9a00;
 }
 
+#chart .bar span {
+  font-size: 12px;
+}
+
 footer {
   font-size: var(--font-size-small);
   margin-top: var(--padding-3);

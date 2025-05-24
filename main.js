@@ -39,14 +39,16 @@ function renderRow(data, key, label) {
         var bar = document.createElement("div");
         bar.classList.add("bar");
         bar.classList.add(item.partition);
-        // Need to use px so that span positioning below works.
+        // Use linear-gradient to have a full-height tooltip target.
         // Note the height defined also in style.css for #chart.
         var height = Math.max(1, 48 * item[key] / ref);
-        bar.style.height = `${height}px`;
+        var color = item.partition === "future" ? "#fe9a00" : "#00bc7d";
+        bar.style.background = `linear-gradient(to bottom, white 0 ${48-height}px, ${color} ${48-height}px 48px)`;
+        bar.style.height = `100%`;
         if (item.partition === "today") {
             var span = document.createElement("span");
             span.style.position = "relative";
-            span.style.top = `${height-3}px`;
+            span.style.top = `${48-3}px`;
             span.innerHTML = "↑";
             bar.appendChild(span);
         }

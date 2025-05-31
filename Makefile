@@ -67,6 +67,10 @@ deploy-html:
 	--acl public-read \
 	--cache-control "public, max-age=86400"
 
+pull-data:
+	rm -f helsinki.json helsinki.npz
+	aws s3 cp s3://otsaloma.io/siitepoly/helsinki.json .
+
 run:
 	python3 -m http.server
 
@@ -85,4 +89,4 @@ venv:
 	  pip install -U pip setuptools wheel && \
 	  pip install -r requirements.txt
 
-.PHONY: check clean dist-lambda deploy-lambda dist-html deploy-html run run-lambda venv
+.PHONY: check clean dist-lambda deploy-lambda dist-html deploy-html pull-data run run-lambda venv

@@ -2,7 +2,7 @@
 
 // Lower limits of "abundant" level as per norkko.fi (grains/m3)
 // https://norkko.fi/usein-kysytyt-kysymykset/
-const YMAX_DEFAULT_LEVELS = {
+const ABUNDANT_LEVELS = {
     alder:   100,
     birch:   100,
     grass:    30,
@@ -21,38 +21,37 @@ function renderRow(data, key, label) {
     const today = data.filter(x => x.partition === "today")[0];
 
     // Label
-    var div = document.createElement("div");
+    let div = document.createElement("div");
     div.classList.add("align-left");
     div.innerHTML = label.substring(0, 3);
     tippy(div, {content: label, placement: "right"});
     chart.appendChild(div);
 
     // Bar
-    // Render the Y-axis maximum at YMAX_DEFAULT_LEVELS
+    // Render the Y-axis maximum at ABUNDANT_LEVELS
     // or maximum seen in the data, whichever is greater.
-    var div = document.createElement("div");
+    div = document.createElement("div");
     div.classList.add("bars");
     div.style.gridTemplateColumns = `repeat(${data.length}, 1fr)`;
-    var ref = data.reduce((ymax, y) => Math.max(ymax, y[key]), 0);
-    ref = Math.max(YMAX_DEFAULT_LEVELS[key], ref);
-    for (var item of data) {
-        var bar = document.createElement("div");
+    const ymax = data.reduce((ymax, x) => Math.max(ymax, x[key]), ABUNDANT_LEVELS[key]);
+    for (const item of data) {
+        const bar = document.createElement("div");
         bar.classList.add("bar");
         bar.classList.add(item.partition);
         // Use linear-gradient to have a full-height tooltip target.
         // Note the height defined also in style.css for #chart.
-        var height = Math.max(1, 48 * item[key] / ref);
-        var color = item.partition === "future" ? "#fe9a00" : "#00bc7d";
+        const height = Math.max(1, 48 * item[key] / ymax);
+        const color = item.partition === "future" ? "#fe9a00" : "#00bc7d";
         bar.style.background = `linear-gradient(to bottom, white 0 ${48-height}px, ${color} ${48-height}px 48px)`;
         bar.style.height = `100%`;
         if (item.partition === "today") {
-            var span = document.createElement("span");
+            const span = document.createElement("span");
             span.style.position = "relative";
             span.style.top = `${48-3}px`;
             span.innerHTML = "↑";
             bar.appendChild(span);
         }
-        var text = `${formatDate(item.date)} · ${item[key].toFixed(0)} h/m³`;
+        const text = `${formatDate(item.date)} · ${item[key].toFixed(0)} h/m³`;
         tippy(bar, {content: text, placement: "bottom"});
         div.appendChild(bar);
     }
@@ -61,24 +60,23 @@ function renderRow(data, key, label) {
     // Percent change
     // Compare the latest date against mean of the previous seven.
     // Avoid showing huge percentages given tiny denominators.
-    var div = document.createElement("div");
+    div = document.createElement("div");
     div.classList.add("align-right");
-    var prev = data.filter(x => x.partition === "past").slice(-7);
-    var ref = prev.reduce((total, x) => total + x[key], 0) / prev.length;
-    if (ref >= YMAX_DEFAULT_LEVELS[key] / 10) {
-        var value = (today[key] - ref) / ref;
-        value = Math.max(-9.99, Math.min(9.99, value));
-        sign = value === 0 ? "" : (value < 0 ? "–" : "+");
-        div.innerHTML = `${sign}${Math.abs(100*value).toFixed(0)}%`;
+    const prev = data.filter(x => x.partition === "past").slice(-7);
+    const mean = prev.reduce((total, x) => total + x[key], 0) / prev.length;
+    if (mean >= ABUNDANT_LEVELS[key] / 10) {
+        const change = Math.max(-9.99, Math.min(9.99, (today[key] - mean) / mean));
+        const sign = change === 0 ? "" : (change < 0 ? "–" : "+");
+        div.innerHTML = `${sign}${Math.abs(100*change).toFixed(0)}%`;
     } else {
         div.innerHTML = `⋯`;
     }
     chart.appendChild(div);
 
     // Value (grains/m3)
-    var div = document.createElement("div");
+    div = document.createElement("div");
     div.classList.add("align-right");
-    var value = Number(today[key].toPrecision(2));
+    const value = Number(today[key].toPrecision(2));
     div.innerHTML = `${value.toFixed(0)}`;
     chart.appendChild(div);
 
@@ -90,7 +88,7 @@ function renderChart(data) {
             .concat(data.filter(x => x.partition === "today")
                     .concat(data.filter(x => x.partition === "future").slice(0, 3))));
 
-    const p = document.getElementById("intro");
+    const intro = document.getElementById("intro");
     const today = data.filter(x => x.partition === "today")[0];
     intro.innerHTML = `Tilanne ${formatDate(today.date)}`;
     // In chronological order of appearance

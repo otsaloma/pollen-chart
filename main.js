@@ -18,7 +18,7 @@ function formatDate(string) {
 
 function renderRow(data, key, label) {
     const chart = document.getElementById("chart");
-    const today = data.filter(x => x.partition === "today")[0];
+    const today = data.find(x => x.partition === "today");
 
     // Label
     let div = document.createElement("div");
@@ -84,12 +84,12 @@ function renderRow(data, key, label) {
 
 function renderChart(data) {
     // Make sure we have at most the expected amount of data.
-    data = (data.filter(x => x.partition === "past").slice(-7)
-            .concat(data.filter(x => x.partition === "today")
-                    .concat(data.filter(x => x.partition === "future").slice(0, 3))));
+    const past = data.filter(x => x.partition === "past").slice(-7);
+    const today = data.find(x => x.partition === "today");
+    const future = data.filter(x => x.partition === "future").slice(0, 3);
+    data = [...past, today, ...future];
 
     const intro = document.getElementById("intro");
-    const today = data.filter(x => x.partition === "today")[0];
     intro.innerHTML = `Tilanne ${formatDate(today.date)}`;
     // In chronological order of appearance
     // https://www.siitepolytieto.fi/mika-allergia/siitepolykausi

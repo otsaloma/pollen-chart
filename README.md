@@ -1,5 +1,4 @@
-Pollen Chart
-============
+# Pollen Chart
 
 A visualization of pollen counts in Helsinki in two parts: (1) A lambda
 function that downloads data from [CAMS][] using [CDSAPI][] to an S3

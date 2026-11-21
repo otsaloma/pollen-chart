@@ -8,4 +8,4 @@ lambda
 lambda.zip
 requirements-lambda.txt
 response.json
-venv
+.venv

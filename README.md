@@ -21,5 +21,5 @@ CDSAPI_KEY=...
 CDSAPI_URL=...
 ```
 
-Create a virtual environment with `make venv`. Run `./download.py local`
-to fetch pollen data. Use `make run` to launch the web app locally.
+Run `uv run ./download.py local` to fetch pollen data. Use `make run` to
+launch the web app locally.

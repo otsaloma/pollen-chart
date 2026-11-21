@@ -1,10 +1,9 @@
 # -*- coding: utf-8-unix -*-
 
-PYTHON = python3.12
 VERSION = `date +%s`
 
 check:
-	flake8 *.py
+	uv run flake8 *.py
 	oxlint --deny-warnings *.js
 
 clean:
@@ -18,16 +17,15 @@ clean:
 # https://aws.amazon.com/premiumsupport/knowledge-center/lambda-python-package-compatible/
 dist-lambda:
 	$(MAKE) check clean
-	cat requirements.txt \
-	| grep -v boto3 \
-	| grep -v flake8 \
-	> requirements-lambda.txt
-	pip3 install \
-	--platform manylinux2014_x86_64 \
-	--target lambda \
-	--implementation cp \
+	uv export \
+	--no-dev \
+	--no-emit-project \
+	--output-file requirements-lambda.txt
+	uv pip install \
+	--python-platform x86_64-manylinux_2_34 \
 	--python-version 3.12 \
-	--only-binary=:all: \
+	--target lambda \
+	--only-binary :all: \
 	-r requirements-lambda.txt
 	rm -rf lambda/bin
 	rm -rf lambda/pandas/tests
@@ -72,7 +70,7 @@ pull-data:
 	aws s3 cp s3://otsaloma.io/siitepoly/helsinki.json .
 
 run:
-	python3 -m http.server
+	uv run python -m http.server
 
 run-lambda:
 	aws lambda invoke \
@@ -82,11 +80,4 @@ run-lambda:
 	response.json
 	cat response.json
 
-venv:
-	rm -rf venv
-	$(PYTHON) -m venv venv
-	. venv/bin/activate && \
-	  pip install -U pip setuptools wheel && \
-	  pip install -r requirements.txt
-
-.PHONY: check clean dist-lambda deploy-lambda dist-html deploy-html pull-data run run-lambda venv
+.PHONY: check clean dist-lambda deploy-lambda dist-html deploy-html pull-data run run-lambda
